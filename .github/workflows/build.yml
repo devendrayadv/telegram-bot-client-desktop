@@ -1,0 +1,49 @@
+name: Build Kotatogram Bot Client
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        
+    - name: Set up Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '5.15.2'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        
+    - name: Install MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+        
+    - name: Configure
+      run: |
+        mkdir build
+        cd build
+        cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DTDESKTOP_API_ID=1237900 -DTDESKTOP_API_HASH=df86a84b0af32d9c97a2a3e85179a46d -DDESKTOP_APP_USE_PACKAGED=OFF ..
+        
+    - name: Build
+      run: |
+        cd build
+        cmake --build . --config Release
+        
+    - name: Package
+      run: |
+        cd build
+        cmake --build . --config Release --target package
+        
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v2  # Changed from v3 to v2 which is more stable
+      with:
+        name: kotatogram-bot-client-windows
+        path: build/*.exe 

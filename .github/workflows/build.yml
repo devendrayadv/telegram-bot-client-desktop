@@ -1,11 +1,12 @@
 name: Build Kotatogram Bot Client
 
 on:
-  push:
-    branches: [ main, master ]
-  pull_request:
-    branches: [ main, master ]
-  workflow_dispatch:
+  # Removing automatic triggers
+  # push:
+  #  branches: [ main, master ]
+  # pull_request:
+  #  branches: [ main, master ]
+  workflow_dispatch:  # Only run manually now
 
 jobs:
   build-windows:

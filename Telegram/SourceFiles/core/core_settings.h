@@ -14,6 +14,7 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include "ui/chat/attach/attach_send_files_way.h"
 #include "base/flags.h"
 #include "emoji.h"
+#include "chat/chat_bot_logger.h"
 
 enum class RectPart;
 struct LanguageId;
@@ -929,6 +930,40 @@ public:
 
 	void resetOnLastLogout();
 
+	// Bot Client Settings
+	[[nodiscard]] bool botLoggingEnabled() const;
+	void setBotLoggingEnabled(bool enabled);
+
+	[[nodiscard]] BotLogger::LogLevel botLogLevel() const;
+	void setBotLogLevel(BotLogger::LogLevel level);
+
+	[[nodiscard]] QString botLogPath() const;
+	void setBotLogPath(const QString &path);
+
+	[[nodiscard]] bool botAutoStart() const;
+	void setBotAutoStart(bool enabled);
+
+	[[nodiscard]] bool botMinimizeToTray() const;
+	void setBotMinimizeToTray(bool enabled);
+
+	[[nodiscard]] bool botStartMinimized() const;
+	void setBotStartMinimized(bool enabled);
+
+	[[nodiscard]] bool botSecureConnection() const;
+	void setBotSecureConnection(bool enabled);
+
+	[[nodiscard]] bool botLocalProxy() const;
+	void setBotLocalProxy(bool enabled);
+
+	[[nodiscard]] bool botEncryptLogs() const;
+	void setBotEncryptLogs(bool enabled);
+
+	[[nodiscard]] bool botAutoUpdate() const;
+	void setBotAutoUpdate(bool enabled);
+
+	[[nodiscard]] int botUpdateChannel() const;
+	void setBotUpdateChannel(int channel);
+
 private:
 	void resolveRecentEmoji() const;
 
@@ -1059,6 +1094,19 @@ private:
 	bool _dialogsWidthSetToZeroWithoutChat = false;
 
 	QByteArray _photoEditorBrush;
+
+	// Bot Client Settings
+	bool _botLoggingEnabled = false;
+	BotLogger::LogLevel _botLogLevel = BotLogger::LogLevel::Info;
+	QString _botLogPath;
+	bool _botAutoStart = false;
+	bool _botMinimizeToTray = true;
+	bool _botStartMinimized = false;
+	bool _botSecureConnection = true;
+	bool _botLocalProxy = false;
+	bool _botEncryptLogs = false;
+	bool _botAutoUpdate = true;
+	int _botUpdateChannel = 0; // 0 - stable, 1 - beta, 2 - dev
 
 };
 

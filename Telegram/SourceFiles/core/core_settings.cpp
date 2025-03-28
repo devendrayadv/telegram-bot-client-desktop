@@ -1520,4 +1520,93 @@ bool Settings::rememberedDeleteMessageOnlyForYou() const {
 	return _rememberedDeleteMessageOnlyForYou;
 }
 
+// Bot Client Settings
+bool Settings::botLoggingEnabled() const {
+	return _botLoggingEnabled;
+}
+
+void Settings::setBotLoggingEnabled(bool enabled) {
+	_botLoggingEnabled = enabled;
+}
+
+BotLogger::LogLevel Settings::botLogLevel() const {
+	return _botLogLevel;
+}
+
+void Settings::setBotLogLevel(BotLogger::LogLevel level) {
+	_botLogLevel = level;
+}
+
+QString Settings::botLogPath() const {
+	return _botLogPath;
+}
+
+void Settings::setBotLogPath(const QString &path) {
+	_botLogPath = path;
+}
+
+bool Settings::botAutoStart() const {
+	return _botAutoStart;
+}
+
+void Settings::setBotAutoStart(bool enabled) {
+	_botAutoStart = enabled;
+}
+
+bool Settings::botMinimizeToTray() const {
+	return _botMinimizeToTray;
+}
+
+void Settings::setBotMinimizeToTray(bool enabled) {
+	_botMinimizeToTray = enabled;
+}
+
+bool Settings::botStartMinimized() const {
+	return _botStartMinimized;
+}
+
+void Settings::setBotStartMinimized(bool enabled) {
+	_botStartMinimized = enabled;
+}
+
+bool Settings::botSecureConnection() const {
+	return _botSecureConnection;
+}
+
+void Settings::setBotSecureConnection(bool enabled) {
+	_botSecureConnection = enabled;
+}
+
+bool Settings::botLocalProxy() const {
+	return _botLocalProxy;
+}
+
+void Settings::setBotLocalProxy(bool enabled) {
+	_botLocalProxy = enabled;
+}
+
+bool Settings::botEncryptLogs() const {
+	return _botEncryptLogs;
+}
+
+void Settings::setBotEncryptLogs(bool enabled) {
+	_botEncryptLogs = enabled;
+}
+
+bool Settings::botAutoUpdate() const {
+	return _botAutoUpdate;
+}
+
+void Settings::setBotAutoUpdate(bool enabled) {
+	_botAutoUpdate = enabled;
+}
+
+int Settings::botUpdateChannel() const {
+	return _botUpdateChannel;
+}
+
+void Settings::setBotUpdateChannel(int channel) {
+	_botUpdateChannel = channel;
+}
+
 } // namespace Core

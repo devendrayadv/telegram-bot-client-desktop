@@ -205,6 +205,11 @@ private:
 
 	mtpRequestId _resetRequest = 0;
 
+	void showBotTokenStep();
+	void showControls();
+
+	object_ptr<Ui::RoundButton> _botTokenButton;
+
 };
 
 } // namespace Intro

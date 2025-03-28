@@ -514,4 +514,16 @@ auto Session::colorIndicesValue()
 	return api().peerColors().indicesValue();
 }
 
+void Session::setBotMode(bool enabled) {
+	if (_isBotMode == enabled) return;
+	_isBotMode = enabled;
+	emit botModeChanged(enabled);
+}
+
+void Session::setBotToken(const QString &token) {
+	if (_botToken == token) return;
+	_botToken = token;
+	emit botTokenChanged(token);
+}
+
 } // namespace Main

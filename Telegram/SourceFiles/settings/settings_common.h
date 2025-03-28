@@ -216,4 +216,10 @@ struct SliderWithLabel {
 	int skip,
 	int minLabelWidth = 0);
 
+enum class Type {
+	// ... existing types ...
+	BotClient,
+	// ... existing types ...
+};
+
 } // namespace Settings

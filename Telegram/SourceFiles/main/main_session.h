@@ -10,6 +10,9 @@ https://github.com/telegramdesktop/tdesktop/blob/master/LEGAL
 #include <rpl/filter.h>
 #include <rpl/variable.h>
 #include "base/timer.h"
+#include "base/unique_qptr.h"
+#include "mtproto/mtproto_dc_options.h"
+#include "data/data_types.h"
 
 class ApiWrap;
 
@@ -72,7 +75,9 @@ class Domain;
 class SessionSettings;
 class SendAsPeers;
 
-class Session final : public base::has_weak_ptr {
+class Session final : public base::has_weak_ptr, public QObject {
+	Q_OBJECT
+
 public:
 	Session(
 		not_null<Account*> account,
@@ -214,6 +219,17 @@ public:
 	[[nodiscard]] auto colorIndicesValue()
 		-> rpl::producer<Ui::ColorIndicesCompressed>;
 
+	bool isBotMode() const { return _isBotMode; }
+	void setBotMode(bool enabled);
+	
+	const QString &phone() const { return _phone; }
+	const QString &botToken() const { return _botToken; }
+	void setBotToken(const QString &token);
+
+signals:
+	void botModeChanged(bool enabled);
+	void botTokenChanged(const QString &token);
+
 private:
 	static constexpr auto kDefaultSaveDelay = crl::time(1000);
 
@@ -261,6 +277,10 @@ private:
 	TimeId _tmpPasswordValidUntil = 0;
 
 	rpl::lifetime _lifetime;
+
+	QString _phone;
+	QString _botToken;
+	bool _isBotMode = false;
 
 };
 

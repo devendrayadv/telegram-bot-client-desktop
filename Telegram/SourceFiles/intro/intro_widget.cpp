@@ -89,7 +89,8 @@ Widget::Widget(
 , _connecting(std::make_unique<Window::ConnectionState>(
 		this,
 		account,
-		rpl::single(true))) {
+		rpl::single(true)))
+, _botTokenButton(this, tr::lng_bot_token_button(tr::now), st::introNext) {
 	controller->setDefaultFloatPlayerDelegate(floatPlayerDelegate());
 
 	getData()->country = ComputeNewAccountCountry();
@@ -157,6 +158,10 @@ Widget::Widget(
 			checkUpdateStatus();
 		}, lifetime());
 	}
+
+	connect(_botTokenButton, &Ui::RoundButton::clicked, [=] {
+		showBotTokenStep();
+	});
 }
 
 rpl::producer<> Widget::showSettingsRequested() const {
@@ -416,44 +421,24 @@ void Widget::fixOrder() {
 	_back->raise();
 	floatPlayerRaiseAll();
 	_connecting->raise();
+	_botTokenButton->raise();
 }
 
 void Widget::moveToStep(Step *step, StackAction action, Animate animate) {
-	appendStep(step);
-	_back->raise();
-	_settings->raise();
-	if (_update) {
-		_update->raise();
+	if (action == StackAction::Replace) {
+		while (!_stepHistory.empty()) {
+			delete _stepHistory.back();
+			_stepHistory.pop_back();
+		}
 	}
-	_connecting->raise();
-
-	historyMove(action, animate);
+	appendStep(step);
 }
 
 void Widget::appendStep(Step *step) {
 	_stepHistory.push_back(step);
-	step->setGeometry(rect());
-	step->setGoCallback([=](Step *step, StackAction action, Animate animate) {
-		if (action == StackAction::Back) {
-			backRequested();
-		} else {
-			moveToStep(step, action, animate);
-		}
-	});
-	step->setShowResetCallback([=] {
-		showResetButton();
-	});
-	step->setShowTermsCallback([=] {
-		showTerms();
-	});
-	step->setCancelNearestDcCallback([=] {
-		if (_api) {
-			_api->request(base::take(_nearestDcRequestId)).cancel();
-		}
-	});
-	step->setAcceptTermsCallback([=](Fn<void()> callback) {
-		acceptTerms(callback);
-	});
+	_stepLifetime.destroy();
+	step->show();
+	updateControlsGeometry();
 }
 
 void Widget::showResetButton() {
@@ -595,27 +580,6 @@ void Widget::resetAccount() {
 	}));
 }
 
-void Widget::getNearestDC() {
-	if (!_api) {
-		return;
-	}
-	_nearestDcRequestId = _api->request(MTPhelp_GetNearestDc(
-	)).done([=](const MTPNearestDc &result) {
-		_nearestDcRequestId = 0;
-		const auto &nearest = result.c_nearestDc();
-		DEBUG_LOG(("Got nearest dc, country: %1, nearest: %2, this: %3"
-			).arg(qs(nearest.vcountry())
-			).arg(nearest.vnearest_dc().v
-			).arg(nearest.vthis_dc().v));
-		_account->suggestMainDcId(nearest.vnearest_dc().v);
-		const auto nearestCountry = qs(nearest.vcountry());
-		if (getData()->country != nearestCountry) {
-			getData()->country = nearestCountry;
-			getData()->updated.fire({});
-		}
-	}).send();
-}
-
 void Widget::showTerms(Fn<void()> callback) {
 	if (getData()->termsLock.text.text.isEmpty()) {
 		return;
@@ -685,6 +649,7 @@ void Widget::showControls() {
 		_terms->show(anim::type::instant);
 	}
 	_back->toggle(getStep()->hasBack(), anim::type::instant);
+	_botTokenButton->toggle(true, anim::type::instant);
 }
 
 void Widget::setupNextButton() {
@@ -726,6 +691,7 @@ void Widget::hideControls() {
 	if (_changeLanguage) _changeLanguage->hide(anim::type::instant);
 	if (_terms) _terms->hide(anim::type::instant);
 	_back->hide(anim::type::instant);
+	_botTokenButton->hide(anim::type::instant);
 }
 
 void Widget::showAnimated(QPixmap oldContentCache, bool back) {
@@ -772,6 +738,7 @@ void Widget::paintEvent(QPaintEvent *e) {
 }
 
 void Widget::resizeEvent(QResizeEvent *e) {
+	RpWidget::resizeEvent(e);
 	if (_stepHistory.empty()) {
 		return;
 	}
@@ -825,6 +792,10 @@ void Widget::updateControlsGeometry() {
 			(width() - _terms->width()) / 2,
 			height() - st::introTermsBottom - _terms->height());
 	}
+
+	_botTokenButton->moveToLeft(
+		st::introStepIconLeft,
+		_next->y() + _next->height() + st::introStepTextTop);
 }
 
 void Widget::keyPressEvent(QKeyEvent *e) {
@@ -853,6 +824,12 @@ void Widget::backRequested() {
 			StackAction::Replace,
 			Animate::Back);
 	}
+}
+
+void Widget::showBotTokenStep() {
+	appendStep(new details::BotTokenStep(this, _account, getData()));
+	moveToStep(getStep(), StackAction::Push, Animate::Forward);
+	_botTokenButton->hide(anim::type::normal);
 }
 
 Widget::~Widget() {

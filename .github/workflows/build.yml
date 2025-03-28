@@ -2,9 +2,9 @@ name: Build Kotatogram Bot Client
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
   workflow_dispatch:
 
 jobs:
@@ -43,7 +43,7 @@ jobs:
         cmake --build . --config Release --target package
         
     - name: Upload artifacts
-      uses: actions/upload-artifact@v2  # Changed from v3 to v2 which is more stable
+      uses: actions/upload-artifact@v3
       with:
         name: kotatogram-bot-client-windows
-        path: build/*.exe 
+        path: build/Kotatogram-*.exe

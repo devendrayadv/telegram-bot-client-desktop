@@ -1,0 +1,55 @@
+name: Simple Build
+
+on:
+  workflow_dispatch:
+    inputs:
+      debug:
+        description: 'Enable debug output'
+        required: false
+        default: 'false'
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        submodules: recursive
+        
+    - name: Set up Qt
+      uses: jurplel/install-qt-action@v3
+      with:
+        version: '5.15.2'
+        host: 'windows'
+        target: 'desktop'
+        arch: 'win64_msvc2019_64'
+        
+    - name: Install MSVC
+      uses: ilammy/msvc-dev-cmd@v1
+        
+    - name: Clean Build Directory
+      run: |
+        Remove-Item -Path "build" -Recurse -Force -ErrorAction SilentlyContinue
+        New-Item -Path "build" -ItemType Directory -Force
+        
+    - name: Configure
+      working-directory: build
+      run: |
+        cmake -G "Visual Studio 17 2022" -A x64 -DCMAKE_BUILD_TYPE=Release -DTDESKTOP_API_ID=1237900 -DTDESKTOP_API_HASH=df86a84b0af32d9c97a2a3e85179a46d -DDESKTOP_APP_USE_PACKAGED=OFF ..
+        
+    - name: Build
+      working-directory: build
+      run: |
+        cmake --build . --config Release --target Kotatogram
+        
+    - name: List Build Directory
+      if: inputs.debug == 'true'
+      working-directory: build
+      run: |
+        Get-ChildItem -Recurse -Path . -ErrorAction SilentlyContinue | Where-Object { $_.Name -like "*.exe" } | Select-Object FullName
+        
+    - name: Upload Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: kotatogram-bot-client
+        path: build/Release/*.exe 
